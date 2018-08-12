@@ -167,101 +167,16 @@ module Rooster
 
         let matches lhs rhs =
             suit lhs = suit rhs
-        
-    
 
-    // SUIT CONVENIENCE ALIASES
-
-    let ACORNS = 
-        NaturalSuit.Acorns
-
-     
-    let COINS =
-        NaturalSuit.Coins
-
-
-    let CUPS =
-        NaturalSuit.Cups
-
-
-    let EGGS = 
-        NaturalSuit.Eggs
-
-     
-    let FEATHERS =
-        NaturalSuit.Feathers
-
-
-    let HEARTS =
-        NaturalSuit.Hearts
-
-
-    let LEAVES = 
-        NaturalSuit.Leaves
-
-
-    let SWORDS =
-        NaturalSuit.Swords
-
-
-    let UPPER =
-        WildSuit.Upper
-
-
-    let LOWER =
-        WildSuit.Lower
-
-
-
-    // RANK CONVENIENCE ALIASES
-
-    let ONE =
-        PipRank.One
-
-
-    let TWO =
-        PipRank.Two
-
-
-    let THREE =
-        PipRank.Three
-
-
-    let FOUR =
-        PipRank.Four
-
-     
-    let FIVE =
-        PipRank.Five
-
-
-    let SIX =
-        PipRank.Six
-
-
-    let SEVEN =
-        PipRank.Seven
-
-
-    let JACK =
-        CourtRank.Jack
-
-
-    let CAVALIER =
-        CourtRank.Cavalier
-
-
-    let KING =
-        CourtRank.King
 
 
 
 // trying out the API...
     let oneOfAcorns = 
-        Card.create <| pip (ONE, ACORNS) 
+        Card.create <| pip (One, Acorns) 
     
     let upperJack =
-        Card.create <| court (JACK, UPPER) 
+        Card.create <| court (Jack, Upper) 
 
 
     let wildJack =
