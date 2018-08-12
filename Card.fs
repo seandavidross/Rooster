@@ -83,14 +83,9 @@ module Rooster
         | AsUnnaturalCourt of UnnaturalIndex
 
 
-    type WildIndex =
-        CourtIndex * AsRoleIndex
-
-
     type Card = 
         private NaturalCard of PipIndex
-        | CourtCard of CourtIndex
-        | WildCard of WildIndex
+        | CourtCard of CourtIndex * AsRoleIndex
 
 
     module Card =
@@ -103,55 +98,52 @@ module Rooster
                     NaturalCard pipIndex
 
                 | CourtCardIndex courtIndex ->
-                    CourtCard courtIndex
+                    CourtCard (courtIndex, AsNaturalCourt courtIndex)
 
        
         let rank card =
             match card with
                 | NaturalCard (r, _) 
-                | WildCard (_, AsNaturalPip (r, _)) ->
+                | CourtCard (_, AsNaturalPip (r, _)) ->
                     Rank.Pip r
                 
-                | CourtCard (r, _)
-                | WildCard (_, AsNaturalCourt (r, _))
-                | WildCard (_, AsUnnaturalCourt (r, _)) ->
+                | CourtCard (_, AsNaturalCourt (r, _))
+                | CourtCard (_, AsUnnaturalCourt (r, _)) ->
                     Rank.Court r
                 
 
         let suit card =
             match card with
                 | NaturalCard (_, s) 
-                | WildCard (_, AsNaturalPip (_, s)) 
-                | WildCard (_, AsUnnaturalCourt (_, s)) ->
+                | CourtCard (_, AsNaturalPip (_, s)) 
+                | CourtCard (_, AsUnnaturalCourt (_, s)) ->
                     Suit.Natural s
                 
-                | CourtCard (_, s)
-                | WildCard (_, AsNaturalCourt (_, s)) ->
+                | CourtCard (_, AsNaturalCourt (_, s)) ->
                     Suit.Wild s
 
  
         let role card =
             match card with
                 | NaturalCard (r, s) 
-                | WildCard (_, AsNaturalPip (r, s)) ->
+                | CourtCard (_, AsNaturalPip (r, s)) ->
                     AsNaturalPip (r, s) 
                 
-                | CourtCard (r, s)
-                | WildCard (_, AsNaturalCourt (r, s)) ->
+                | CourtCard (_, AsNaturalCourt (r, s)) ->
                     AsNaturalCourt (r, s)
                 
-                | WildCard (_, AsUnnaturalCourt (r, s)) ->
+                | CourtCard (_, AsUnnaturalCourt (r, s)) ->
                     AsUnnaturalCourt (r, s)
  
         
         let wild courtCard roleIndex =
             match (courtCard, roleIndex) with
-                | (CourtCard courtIndex, AsNaturalPip (r, _)) ->
-                    Some <| WildCard (courtIndex, roleIndex)
+                | (CourtCard (courtIndex, _), AsNaturalPip (r, _)) ->
+                    Some <| CourtCard (courtIndex, roleIndex)
                 
-                | (CourtCard (c, s), AsUnnaturalCourt (r, _)) 
-                | (CourtCard (c, s), AsNaturalCourt (r, _)) when c >= r ->
-                    Some <| WildCard ((c, s), roleIndex)
+                | (CourtCard ((c, s), _), AsUnnaturalCourt (r, _)) 
+                | (CourtCard ((c, s), _), AsNaturalCourt (r, _)) when c >= r ->
+                    Some <| CourtCard ((c, s), roleIndex)
                 
                 | otherwise ->
                     None
@@ -168,19 +160,3 @@ module Rooster
         let flush lhs rhs =
             suit lhs = suit rhs
 
-
-
-
-// trying out the API...
-    let oneOfAcorns = 
-        Card.create <| pip (One, Acorns) 
-    
-    let upperJack =
-        Card.create <| court (Jack, Upper) 
-
-
-    let wildJack =
-        Card.wild upperJack <| Card.role oneOfAcorns
- 
- 
-   
