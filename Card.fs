@@ -16,12 +16,6 @@ module Rooster
         | Lower
 
 
-    [<RequireQualifiedAccess>]
-    type Suit =
-        | Natural of NaturalSuit
-        | Wild of WildSuit
-
-
     type PipRank =
         | One
         | Two
@@ -38,14 +32,17 @@ module Rooster
         | King
 
 
-    [<RequireQualifiedAccess>]
+    // Keeping the natural ranks and suits seperate from the wild/court card 
+    // ranks and suits helps makes it impossible to construct invalid cards. 
+    // E.g., its impossible to make a "One of Upper" or a "Jack of Acorns". 
+    type Suit =
+        | Natural of NaturalSuit
+        | Wild of WildSuit
+
     type Rank =
         | Pip of PipRank
         | Court of CourtRank
 
-
-
-    // CARD
 
     type PipIndex =
         PipRank * NaturalSuit
@@ -54,16 +51,32 @@ module Rooster
     type CourtIndex =
         CourtRank * WildSuit
 
-     
+    
+    type CardIndex =
+        | PipCardIndex of PipIndex
+        | CourtCardIndex of CourtIndex
+
+
+    // a couple of constructor convenience aliases..
+    let pip =
+        PipCardIndex
+
+    
+    let court =
+        CourtCardIndex
+
+
+    // The "natural" suit for a court card is a WildSuit. When used as a wild 
+    // card a court card can assume a NaturalSuit, i.e., the "wild" suit for a 
+    // court card can be a NaturalSuit. Calling this index a WildIndex would be
+    // confusing, so I've opted for UnnaturalIndex as this is not the "natural" 
+    // suit for a court card.
     type UnnaturalIndex =
         CourtRank * NaturalSuit
 
-
-    type CardIndex =
-        | Pip of PipIndex
-        | Court of CourtIndex
-
-
+    
+    // When used as a wild card, a court card can "act" as though it has a
+    // different rank or suit. These are the possible roles it can play...
     type AsRoleIndex =
         | AsNaturalPip of PipIndex
         | AsNaturalCourt of CourtIndex
@@ -81,13 +94,16 @@ module Rooster
 
 
     module Card =
+
+        // Some combinations of (Rank, Suit) would make an invalid card;
+        // the CardIndex type makes it impossible to use those combinations. 
         let create cardIndex =
             match cardIndex with
-                | Pip pipIndex ->
-                    Card.NaturalCard pipIndex
+                | PipCardIndex pipIndex ->
+                    NaturalCard pipIndex
 
-                | Court courtIndex ->
-                    Card.CourtCard courtIndex
+                | CourtCardIndex courtIndex ->
+                    CourtCard courtIndex
 
        
         let rank card =
@@ -102,7 +118,6 @@ module Rooster
                     Rank.Court r
                 
 
-
         let suit card =
             match card with
                 | NaturalCard (_, s) 
@@ -114,22 +129,8 @@ module Rooster
                 | WildCard (_, AsNaturalCourt (_, s)) ->
                     Suit.Wild s
 
-        
-        let index card =
-            (rank card, suit card)
-        
-
-        let rawIndex card =
-            match card with
-                | NaturalCard (r, s) ->
-                    CardIndex.Pip (r, s)
-                
-                | CourtCard (r, s)
-                | WildCard ((r, s), _) ->
-                    CardIndex.Court (r, s)
-
  
-        let roleIndex card =
+        let role card =
             match card with
                 | NaturalCard (r, s) 
                 | WildCard (_, AsNaturalPip (r, s)) ->
@@ -144,21 +145,16 @@ module Rooster
  
         
         let wild courtCard roleIndex =
-            let courtIndex =
-                rawIndex courtCard
-
-            match (courtIndex, roleIndex) with
-                | (CardIndex.Pip (_), _) ->
-                    Error "A pip card cannot be used as a wild card. Use a court card instead."
-                | (CardIndex.Court (c, s), AsNaturalPip (r, _)) ->
-                    Ok <| WildCard ((c, s), roleIndex)
+            match (courtCard, roleIndex) with
+                | (CourtCard courtIndex, AsNaturalPip (r, _)) ->
+                    Some <| WildCard (courtIndex, roleIndex)
                 
-                | (CardIndex.Court (c, s), AsUnnaturalCourt (r, _)) 
-                | (CardIndex.Court (c, s), AsNaturalCourt (r, _)) -> 
-                    if c >= r then
-                        Ok <| WildCard ((c, s), roleIndex)
-                    else
-                        Error "A wild card cannot assume a rank higher than its own natural rank."
+                | (CourtCard (c, s), AsUnnaturalCourt (r, _)) 
+                | (CourtCard (c, s), AsNaturalCourt (r, _)) when c >= r ->
+                    Some <| WildCard ((c, s), roleIndex)
+                
+                | otherwise ->
+                    None
 
 
         let beats lhs rhs =
@@ -169,133 +165,22 @@ module Rooster
             rank lhs = rank rhs
 
 
-        let matches lhs rhs =
+        let flush lhs rhs =
             suit lhs = suit rhs
-        
-// TODO: test api. see if more modules and constructors make sense...
-
-
-    // CONSTRUCTOR CONVENIENCE ALIASES
-    let pip = 
-        CardIndex.Pip
-
-    
-    let court =
-        CardIndex.Court
-
-    
-    let card =
-        Card.create
-
-
-    let wild =
-        Card.wild
-
-    
-    let asNaturalPip =
-        AsRoleIndex.AsNaturalPip
-    
-
-    let asNaturalCourt =
-        AsRoleIndex.AsNaturalCourt
-    
-
-    let asUnnaturalCourt =
-        AsRoleIndex.AsUnnaturalCourt
-    
-
-
-    // SUIT CONVENIENCE ALIASES
-
-    let ACORNS = 
-        NaturalSuit.Acorns
-
-     
-    let COINS =
-        NaturalSuit.Coins
-
-
-    let CUPS =
-        NaturalSuit.Cups
-
-
-    let EGGS = 
-        NaturalSuit.Eggs
-
-     
-    let FEATHERS =
-        NaturalSuit.Feathers
-
-
-    let HEARTS =
-        NaturalSuit.Hearts
-
-
-    let LEAVES = 
-        NaturalSuit.Leaves
-
-
-    let SWORDS =
-        NaturalSuit.Swords
-
-
-    let UPPER =
-        WildSuit.Upper
-
-
-    let LOWER =
-        WildSuit.Lower
 
 
 
-    // RANK CONVENIENCE ALIASES
 
-    let ONE =
-        PipRank.One
-
-
-    let TWO =
-        PipRank.Two
-
-
-    let THREE =
-        PipRank.Three
-
-
-    let FOUR =
-        PipRank.Four
-
-     
-    let FIVE =
-        PipRank.Five
-
-
-    let SIX =
-        PipRank.Six
-
-
-    let SEVEN =
-        PipRank.Seven
-
-
-    let JACK =
-        CourtRank.Jack
-
-
-    let CAVALIER =
-        CourtRank.Cavalier
-
-
-    let KING =
-        CourtRank.King
-
-
+// trying out the API...
     let oneOfAcorns = 
-        pip (ONE, ACORNS) |> card
+        Card.create <| pip (One, Acorns) 
     
     let upperJack =
-        court (JACK, UPPER) |> card
-    
+        Card.create <| court (Jack, Upper) 
+
+
     let wildJack =
-        Card.roleIndex oneOfAcorns |> wild upperJack
+        Card.wild upperJack <| Card.role oneOfAcorns
+ 
+ 
    
