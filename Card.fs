@@ -165,7 +165,7 @@ module Rooster
             rank lhs = rank rhs
 
 
-        let matches lhs rhs =
+        let flush lhs rhs =
             suit lhs = suit rhs
 
 
