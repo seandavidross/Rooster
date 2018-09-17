@@ -39,6 +39,7 @@ module Rooster
         | Natural of NaturalSuit
         | Wild of WildSuit
 
+    
     type Rank =
         | Pip of PipRank
         | Court of CourtRank
