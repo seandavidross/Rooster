@@ -126,15 +126,15 @@ module Rooster
  
         let role card =
             match card with
-                | NaturalCard (r, s) 
-                | CourtCard (_, AsNaturalPip (r, s)) ->
-                    AsNaturalPip (r, s) 
+                | NaturalCard pipIndex
+                | CourtCard (_, AsNaturalPip pipIndex) ->
+                    AsNaturalPip pipIndex
                 
-                | CourtCard (_, AsNaturalCourt (r, s)) ->
-                    AsNaturalCourt (r, s)
+                | CourtCard (_, AsNaturalCourt courtIndex) ->
+                    AsNaturalCourt courtIndex
                 
-                | CourtCard (_, AsUnnaturalCourt (r, s)) ->
-                    AsUnnaturalCourt (r, s)
+                | CourtCard (_, AsUnnaturalCourt unnaturalIndex) ->
+                    AsUnnaturalCourt unnaturalIndex
  
         
         let wild courtCard roleIndex =
@@ -142,7 +142,7 @@ module Rooster
                 | (CourtCard (courtIndex, _), AsNaturalPip (r, _)) ->
                     Some <| CourtCard (courtIndex, roleIndex)
                 
-                | (CourtCard ((c, s), _), AsUnnaturalCourt (r, _)) 
+                | (CourtCard ((c, s), _), AsUnnaturalCourt (r, _)) when c >= r
                 | (CourtCard ((c, s), _), AsNaturalCourt (r, _)) when c >= r ->
                     Some <| CourtCard ((c, s), roleIndex)
                 
