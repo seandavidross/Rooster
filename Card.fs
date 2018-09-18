@@ -95,59 +95,59 @@ module Rooster
         // the CardIndex type makes it impossible to use those combinations. 
         let create cardIndex =
             match cardIndex with
-                | PipCardIndex pipIndex ->
-                    NaturalCard pipIndex
+            | PipCardIndex pipIndex ->
+                NaturalCard pipIndex
 
-                | CourtCardIndex courtIndex ->
-                    CourtCard (courtIndex, AsNaturalCourt courtIndex)
+            | CourtCardIndex courtIndex ->
+                CourtCard (courtIndex, AsNaturalCourt courtIndex)
 
        
         let rank card =
             match card with
-                | NaturalCard (r, _) 
-                | CourtCard (_, AsNaturalPip (r, _)) ->
-                    Rank.Pip r
-                
-                | CourtCard (_, AsNaturalCourt (r, _))
-                | CourtCard (_, AsUnnaturalCourt (r, _)) ->
-                    Rank.Court r
+            | NaturalCard (r, _) 
+            | CourtCard (_, AsNaturalPip (r, _)) ->
+                Rank.Pip r
+            
+            | CourtCard (_, AsNaturalCourt (r, _))
+            | CourtCard (_, AsUnnaturalCourt (r, _)) ->
+                Rank.Court r
                 
 
         let suit card =
             match card with
-                | NaturalCard (_, s) 
-                | CourtCard (_, AsNaturalPip (_, s)) 
-                | CourtCard (_, AsUnnaturalCourt (_, s)) ->
-                    Suit.Natural s
-                
-                | CourtCard (_, AsNaturalCourt (_, s)) ->
-                    Suit.Wild s
+            | NaturalCard (_, s) 
+            | CourtCard (_, AsNaturalPip (_, s)) 
+            | CourtCard (_, AsUnnaturalCourt (_, s)) ->
+                Suit.Natural s
+            
+            | CourtCard (_, AsNaturalCourt (_, s)) ->
+                Suit.Wild s
 
  
         let role card =
             match card with
-                | NaturalCard pipIndex
-                | CourtCard (_, AsNaturalPip pipIndex) ->
-                    AsNaturalPip pipIndex
-                
-                | CourtCard (_, AsNaturalCourt courtIndex) ->
-                    AsNaturalCourt courtIndex
-                
-                | CourtCard (_, AsUnnaturalCourt unnaturalIndex) ->
-                    AsUnnaturalCourt unnaturalIndex
+            | NaturalCard pipIndex
+            | CourtCard (_, AsNaturalPip pipIndex) ->
+                AsNaturalPip pipIndex
+            
+            | CourtCard (_, AsNaturalCourt courtIndex) ->
+                AsNaturalCourt courtIndex
+            
+            | CourtCard (_, AsUnnaturalCourt unnaturalIndex) ->
+                AsUnnaturalCourt unnaturalIndex
  
         
         let wild courtCard roleIndex =
-            match (courtCard, roleIndex) with
-                | (CourtCard (courtIndex, _), AsNaturalPip (r, _)) ->
-                    Some <| CourtCard (courtIndex, roleIndex)
-                
-                | (CourtCard ((c, s), _), AsUnnaturalCourt (r, _)) when c >= r
-                | (CourtCard ((c, s), _), AsNaturalCourt (r, _)) when c >= r ->
-                    Some <| CourtCard ((c, s), roleIndex)
-                
-                | otherwise ->
-                    None
+            match courtCard, roleIndex with
+            | CourtCard (courtIndex, _), AsNaturalPip _ ->
+                Some <| CourtCard (courtIndex, roleIndex)
+            
+            | CourtCard ((c, s), _), AsUnnaturalCourt (r, _) 
+            | CourtCard ((c, s), _), AsNaturalCourt (r, _) when c >= r ->
+                Some <| CourtCard ((c, s), roleIndex)
+            
+            | _ ->
+                None
 
 
         let beats lhs rhs =
