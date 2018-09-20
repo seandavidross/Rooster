@@ -107,6 +107,7 @@ let value card =
     | CourtCard (courtIndex, roleIndex) ->
         (CourtCardIndex courtIndex, roleIndex)
 
+
 let rank card =
     match card with
     | NaturalCard (r, _) 
@@ -116,7 +117,17 @@ let rank card =
     | CourtCard (_, AsNaturalCourt (r, _))
     | CourtCard (_, AsUnnaturalCourt (r, _)) ->
         Rank.Court r
-        
+
+
+let roleRank role =
+    match role with
+    | AsNaturalPip (r, _) ->
+        Rank.Pip r
+
+    | AsNaturalCourt (r, _)
+    | AsUnnaturalCourt (r, _) ->
+        Rank.Court r
+
 
 let suit card =
     match card with
