@@ -59,10 +59,13 @@ type CardIndex =
 
 
 // a couple of constructor convenience aliases..
+
+// PipRank * NaturalSuit -> CardIndex
 let pip =
     PipCardIndex
 
 
+// CourtRank * WildSuit -> CardIndex
 let court =
     CourtCardIndex
 
@@ -91,6 +94,8 @@ type Card =
 
 // Some combinations of (Rank, Suit) would make an invalid card;
 // the CardIndex type makes it impossible to use those combinations. 
+
+// CardIndex -> Card
 let create cardIndex =
     match cardIndex with
     | PipCardIndex pipIndex ->
@@ -100,6 +105,7 @@ let create cardIndex =
         CourtCard (courtIndex, AsNaturalCourt courtIndex)
 
 
+// Card -> CardIndex * AsRoleIndex
 let value card =
     match card with
     | NaturalCard pipIndex ->
@@ -108,6 +114,7 @@ let value card =
         (CourtCardIndex courtIndex, roleIndex)
 
 
+// Card -> Rank
 let rank card =
     match card with
     | NaturalCard (r, _) 
@@ -119,6 +126,7 @@ let rank card =
         Rank.Court r
 
 
+// AsRoleIndex -> Rank
 let roleRank role =
     match role with
     | AsNaturalPip (r, _) ->
@@ -129,6 +137,7 @@ let roleRank role =
         Rank.Court r
 
 
+// Card -> Suit
 let suit card =
     match card with
     | NaturalCard (_, s) 
@@ -140,6 +149,7 @@ let suit card =
         Suit.Wild s
 
 
+// Card -> AsRoleIndex
 let role card =
     match card with
     | NaturalCard pipIndex
@@ -153,6 +163,7 @@ let role card =
         AsUnnaturalCourt unnaturalIndex
 
 
+// Card -> AsRoleIndex -> Card option
 let wild courtCard roleIndex =
     match courtCard, roleIndex with
     | CourtCard (courtIndex, _), AsNaturalPip _ ->
@@ -166,14 +177,24 @@ let wild courtCard roleIndex =
         None
 
 
+// Card -> Card -> bool
 let beats lhs rhs =
     rank lhs > rank rhs
 
 
+// Card -> Card -> bool
 let equals lhs rhs =
     rank lhs = rank rhs
 
 
+// Card -> Card -> bool
 let flush lhs rhs =
     suit lhs = suit rhs
 
+
+// Card -> Card -> bool
+let sort lhs rhs =
+    if equals lhs rhs then
+        suit lhs < suit rhs
+    else
+        beats rhs lhs
